@@ -1,0 +1,26 @@
+# Dataset (too large for git — download from Kaggle)
+MedSynora DW/
+
+# Generated outputs (reproducible via `python main.py`)
+output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
