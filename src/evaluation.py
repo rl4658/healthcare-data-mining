@@ -16,7 +16,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score, silhouette_samples
+from sklearn.metrics import silhouette_score, silhouette_samples, davies_bouldin_score, calinski_harabasz_score
 
 
 def ensure_dir(path: str):
@@ -252,4 +252,71 @@ def run_evaluation(X_scaled, df_clean, feature_names,
     print("\n--- Silhouette Analysis ---")
     sil_score, labels_full = silhouette_analysis(X_scaled, optimal_k, output_dir=output_dir)
 
-    return optimal_k, sil_score
+    return optimal_k, sil_score, labels_full
+
+
+# ---------------------------------------------------------------------------
+# 4. Model Comparison (K-Means vs K-Medoids)
+# ---------------------------------------------------------------------------
+
+def compare_clustering_metrics(X_kmeans, labels_kmeans, X_kmedoids, labels_kmedoids,
+                               output_dir="output/plots/evaluation"):
+    """Calculate DB, CH, and Silhouette indices for both models and plot comparison."""
+    ensure_dir(output_dir)
+    print("\n" + "=" * 60)
+    print("MODEL COMPARISON (K-Means vs K-Medoids)")
+    print("=" * 60)
+
+    # Subsample if dataset is too large to compute Silhouette quickly
+    def get_metrics(X, labels):
+        sample_size = 15000
+        n_samples = X.shape[0]
+        if n_samples > sample_size:
+            rng = np.random.RandomState(42)
+            idx = rng.choice(n_samples, size=sample_size, replace=False)
+            X_eval = X[idx]
+            labels_eval = labels[idx]
+        else:
+            X_eval = X
+            labels_eval = labels
+        
+        sil = silhouette_score(X_eval, labels_eval)
+        db = davies_bouldin_score(X_eval, labels_eval)
+        ch = calinski_harabasz_score(X_eval, labels_eval)
+        return {"Silhouette": sil, "Davies-Bouldin": db, "Calinski-Harabasz": ch}
+
+    print("  Calculating metrics for K-Means...")
+    metrics_kmeans = get_metrics(X_kmeans, labels_kmeans)
+    
+    print("  Calculating metrics for K-Medoids...")
+    metrics_kmedoids = get_metrics(X_kmedoids, labels_kmedoids)
+
+    print("\n  [Performance Metrics Comparison]")
+    print(f"  {'Metric':<20} | {'K-Means':<15} | {'K-Medoids':<15}")
+    print("  " + "-" * 55)
+    
+    metrics_names = ["Silhouette", "Davies-Bouldin", "Calinski-Harabasz"]
+    
+    for m in metrics_names:
+         print(f"  {m:<20} | {metrics_kmeans[m]:<15.4f} | {metrics_kmedoids[m]:<15.4f}")
+
+    # Plot Comparison Bar Chart
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    
+    for i, m in enumerate(metrics_names):
+        vals = [metrics_kmeans[m], metrics_kmedoids[m]]
+        bars = axes[i].bar(["K-Means", "K-Medoids"], vals, color=["#1E88E5", "#D81B60"])
+        axes[i].set_title(m, fontsize=14, fontweight="bold")
+        # add labels on top
+        for bar in bars:
+            yval = bar.get_height()
+            axes[i].text(bar.get_x() + bar.get_width()/2, yval, f"{yval:.2f}",
+                         ha='center', va='bottom', fontsize=12, fontweight="bold")
+    
+    fig.suptitle("Performance Measures: K-Means vs K-Medoids\n(Silhouette/CH: Higher is better | DB: Lower is better)", fontsize=16, fontweight="bold", y=1.05)
+    plt.tight_layout()
+    fig.savefig(os.path.join(output_dir, "kmeans_vs_kmedoids_comparison.png"))
+    plt.close(fig)
+    
+    print(f"\n  -> Comparison chart saved to {output_dir}/kmeans_vs_kmedoids_comparison.png")
+

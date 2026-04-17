@@ -57,3 +57,11 @@ python main.py
 - **WCSS Objective**: J = Σᵢ Σ_{x∈Cᵢ} ||x − μᵢ||²
 - **Euclidean Distance**: d(x,μ) = √(Σⱼ (xⱼ − μⱼ)²)
 - **Centroid Update**: μᵢ = (1/|Cᵢ|) Σ_{x∈Cᵢ} x
+
+## Conclusions
+The clustering model successfully stratifies the patient population into meaningful segments based on severity and resource usage. By interpreting these clusters, healthcare administrators can proactively identify high-risk, high-cost patient groups, optimize staffing for severe cases, and allocate preventative care resources to those with escalating vitals before they require emergency intervention.
+
+## Future Work
+- **Classification Modeling**: Develop a predictive model (e.g., Random Forest or XGBoost) to classify new, incoming patient encounters into these identified severity clusters in real-time.
+- **Time-Series Analysis**: Incorporate temporal sequences of patient visits to predict disease progression and worsening clinical indicators over time.
+- **Enhanced Deployment**: Package the analytical pipeline into a containerized REST API (via Flask or FastAPI) or a real-time web dashboard using Streamlit to provide on-demand stratification for hospital triage systems.

@@ -40,7 +40,9 @@ from src.kmeans_iterative import run_kmeans_iterative
 from src.evaluation import (
     run_evaluation,
     cluster_heatmap,
+    compare_clustering_metrics
 )
+from src.kmedoids_analysis import run_kmedoids
 from src.plantuml_schema import generate_plantuml
 
 
@@ -86,7 +88,7 @@ def main():
     print("\n" + "=" * 60)
     print("STEP 4 -- ELBOW METHOD & SILHOUETTE ANALYSIS")
     print("=" * 60)
-    optimal_k, sil_score = run_evaluation(
+    optimal_k, sil_score, labels_full_kmeans = run_evaluation(
         X_scaled, df_clean, feature_names,
         output_dir="output/plots/evaluation",
     )
@@ -112,8 +114,26 @@ def main():
     print("STEP 6 -- CLUSTER PROFILE & INTERPRETATION")
     print("=" * 60)
     cluster_means, interpretations = cluster_heatmap(
-        df_clean, labels, feature_names,
+        df_clean, labels_full_kmeans, feature_names,
         output_dir="output/plots/evaluation",
+    )
+
+    # ------------------------------------------------------------------
+    # Step 6.5: K-Medoids Evaluation & Metrics Comparison
+    # ------------------------------------------------------------------
+    print("\n" + "=" * 60)
+    print("STEP 6.5 -- K-MEDOIDS & COMPARISON")
+    print("=" * 60)
+    kmed_model, X_work_kmedoids, labels_kmedoids = run_kmedoids(
+        X_scaled,
+        k=optimal_k,
+        output_dir="output/plots/kmedoids",
+    )
+    
+    compare_clustering_metrics(
+        X_scaled, labels_full_kmeans, 
+        X_work_kmedoids, labels_kmedoids,
+        output_dir="output/plots/evaluation"
     )
 
     # ------------------------------------------------------------------

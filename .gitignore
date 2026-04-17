@@ -14,6 +14,7 @@ venv/
 *.egg-info/
 dist/
 build/
+read_docx.py
 
 # IDE
 .vscode/
@@ -24,3 +25,8 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated Presentation Texts
+presentation_script.txt
+presentation_slide_prompts.txt
+rubric.txt
